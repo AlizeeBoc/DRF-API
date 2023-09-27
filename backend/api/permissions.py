@@ -1,7 +1,9 @@
 from rest_framework import permissions
 
 
-class isStaffEditorPermission(permissions.DjangoModelPermissions): # cf custom permissions
+class IsStaffEditorPermission(
+    permissions.DjangoModelPermissions
+):  # cf custom permissions
     perms_map = {
         "GET": ["%(app_label)s.view_%(model_name)s"],
         "OPTIONS": [],
@@ -12,7 +14,7 @@ class isStaffEditorPermission(permissions.DjangoModelPermissions): # cf custom p
         "DELETE": ["%(app_label)s.delete_%(model_name)s"],
     }
 
-    #def has_permissions(self, request, view):
+    # def has_permissions(self, request, view):
     #    if not request.user.is_staff:
     #        return False
     #    return super().has_permission(request, view)
@@ -32,4 +34,4 @@ class isStaffEditorPermission(permissions.DjangoModelPermissions): # cf custom p
     #        return False
     #    return False
 
-    # isStaffEditorPermission hérite de la classe permissions.DjangoModelPermissions : hérite de l'autoristion d'accéder a un objet si membre du staff et a la permission view_products
+    # IsStaffEditorPermission hérite de la classe permissions.DjangoModelPermissions : hérite de l'autoristion d'accéder a un objet si membre du staff et a la permission view_products
