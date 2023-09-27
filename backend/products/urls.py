@@ -11,7 +11,7 @@ from . import views
 #]
 
 
-# CRUD /api/products/
+# CRUD /api/products/ >>>> préférer les viewset/router
 urlpatterns = [
     path('', views.product_list_create_view),  
     path('<int:pk>/update/', views.product_update_view),
