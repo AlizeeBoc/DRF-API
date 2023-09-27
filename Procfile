@@ -1,3 +1,3 @@
-web: gunicorn djangoRestFramework.wsgi
+web: gunicorn backend.wsgi
 
 
