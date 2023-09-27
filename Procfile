@@ -1,3 +1,3 @@
-web: gunicorn cfe.wsgi
+web: gunicorn cfehome.wsgi
 
 
