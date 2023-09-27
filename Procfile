@@ -1,3 +1,3 @@
-web: gunicorn backend.wsgi
+web: gunicorn cfe.wsgi
 
 
