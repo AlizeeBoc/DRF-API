@@ -3,13 +3,14 @@ from rest_framework import permissions
 from .permissions import IsStaffEditorPermission
 
 
-class StaffEditorPermissionMixin:
+class StaffEditorPermissionMixin():
     permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
-#Filtre les objets selon l'utilisateur connecté
+#data associées à son user : Filtre les objets selon l'utilisateur connecté
 class UserQuerySetMixin():
      user_field = 'user' #variable "de filtrage"
      allow_staff_view = False # /
+
      def get_queryset(self, *args, **kwargs):
         user = self.request.user
         lookup_data = {}

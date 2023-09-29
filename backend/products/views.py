@@ -1,13 +1,11 @@
-from rest_framework import (
-    generics,
-    mixins,
-)  # classes de views génériques simplifiat les CRUD op
+from rest_framework import generics, mixins  # classes de views génériques simplifiat les CRUD op
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from api.mixins import (
     StaffEditorPermissionMixin,
     UserQuerySetMixin)
+
 from .models import Product
 from .serializers import ProductSerializer
 
@@ -21,14 +19,13 @@ class ProductListCreateAPIView(
     queryset = Product.objects.all()
     serializer_class = ProductSerializer  # indique quel sérializer utiliser pour convertir les Product en JSON
     # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # cf custom permissions
-    allow_staff_view = False
+    #allow_staff_view = False
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
         # print(serializer.validated_data)
         title = serializer.validated_data.get("title")
-        content = serializer.validated_data.get("content")
-
+        content = serializer.validated_data.get("content") or None
         if content is None:
             content = title
         serializer.save(user=self.request.user, content=content)
@@ -43,9 +40,8 @@ class ProductListCreateAPIView(
     #    #print(request.user)
     #    return qs.filter(user=request.user) # récupère les products associés à cet user
 
-product_list_create_view = (
-    ProductListCreateAPIView.as_view()
-)  # as_view() = convertit les classe de vue géné en *fonctions* de vue associables à des urls
+product_list_create_view = ProductListCreateAPIView.as_view()
+  # as_view() = convertit les classe de vue géné en *fonctions* de vue associables à des urls
 
 
 class ProductDetailAPIView(

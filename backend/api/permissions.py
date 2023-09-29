@@ -1,11 +1,9 @@
 from rest_framework import permissions
 
 
-class IsStaffEditorPermission(
-    permissions.DjangoModelPermissions
-):  # cf custom permissions
+class IsStaffEditorPermission(permissions.DjangoModelPermissions):  # cf custom permissions
     perms_map = {
-        "GET": ["%(app_label)s.view_%(model_name)s"],
+        'GET': ['%(app_label)s.view_%(model_name)s'],
         "OPTIONS": [],
         "HEAD": [],
         "POST": ["%(app_label)s.add_%(model_name)s"],
