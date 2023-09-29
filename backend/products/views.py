@@ -1,58 +1,69 @@
-from rest_framework import (
-    authentication,
-    generics,
-    mixins,
-    permissions,
-)  # classes de views génériques simplifiat les CRUD op
+from rest_framework import generics, mixins  # classes de views génériques simplifiat les CRUD op
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-
-from api.authentication import TokenAuthentication # si Bearer a la place de Token as kw
+from api.mixins import (
+    StaffEditorPermissionMixin,
+    UserQuerySetMixin)
 
 from .models import Product
-from .permissions import isStaffEditorPermission
 from .serializers import ProductSerializer
 
 # generics views : classe based views [...]
 
 
 class ProductListCreateAPIView(
-    generics.ListCreateAPIView
-):  # classe de vue générique (crée un objet si POST ou les liste si GET)
+    UserQuerySetMixin,
+    StaffEditorPermissionMixin, 
+    generics.ListCreateAPIView):  # classe de vue générique (crée un objet si POST ou les liste si GET)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer  # indique quel sérializer utiliser pour convertir les Product en JSON
-    authentication_classes = [authentication.SessionAuthentication, TokenAuthentication]
-    permission_classes = [permissions.IsAdminUser, isStaffEditorPermission] # cf custom permissions
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # cf custom permissions
+    #allow_staff_view = False
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
         # print(serializer.validated_data)
         title = serializer.validated_data.get("title")
-        content = serializer.validated_data.get("content")
-
+        content = serializer.validated_data.get("content") or None
         if content is None:
             content = title
-        serializer.save(content=content)
+        serializer.save(user=self.request.user, content=content)
+
+    # finalement remplacé par le UserQuerySetMixin :
+    #def get_queryset(self, *args, **kwargs):
+    #    qs = super().get_queryset(*args, **kwargs) # récupère tous les produits (Product.objects.all())
+    #    request = self.request
+    #    user = request.user
+    #    if not user.is_authenticated: # check si l'utilisateur est auth
+    #        return Product.objects.none()
+    #    #print(request.user)
+    #    return qs.filter(user=request.user) # récupère les products associés à cet user
+
+product_list_create_view = ProductListCreateAPIView.as_view()
+  # as_view() = convertit les classe de vue géné en *fonctions* de vue associables à des urls
 
 
-product_list_create_view = (
-    ProductListCreateAPIView.as_view()
-)  # as_view() = convertit les classe de vue géné en *fonctions* de vue associables à des urls
-
-
-class ProductDetailAPIView(generics.RetrieveAPIView):  # récupère un objet par son id
+class ProductDetailAPIView(
+    UserQuerySetMixin,
+    StaffEditorPermissionMixin, 
+    generics.RetrieveAPIView):  # récupère un objet par son id
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # cf custom permissions
 
 
 product_detail_view = ProductDetailAPIView.as_view()
 
 
-class ProductUpdateAPIView(generics.UpdateAPIView):  # update un objet par son id
+class ProductUpdateAPIView(
+    UserQuerySetMixin,
+    StaffEditorPermissionMixin, 
+    generics.UpdateAPIView):  # update un objet par son id
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = "pk"
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # cf custom permissions
 
     def perform_update(self, serializer):
         instance = serializer.save()
@@ -63,10 +74,14 @@ class ProductUpdateAPIView(generics.UpdateAPIView):  # update un objet par son i
 product_update_view = ProductUpdateAPIView.as_view()
 
 
-class ProductDestroyAPIView(generics.DestroyAPIView):  # delete un objet par son id
+class ProductDestroyAPIView(
+    UserQuerySetMixin,
+    StaffEditorPermissionMixin, generics.DestroyAPIView
+):  # delete un objet par son id
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = "pk"
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # cf custom permissions
 
     def perform_destroy(self, instance):
         super().perform_destroy(instance)
@@ -107,11 +122,12 @@ class ProductMixinView(
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
         # print(serializer.validated_data)
+        #email = serializer.validated_data.pop('email')
+        #print(email)
         title = serializer.validated_data.get("title")
         content = serializer.validated_data.get("content")
-
         if content is None:
-            content = "This is a single view dooing cool stuff"
+            content = title
         serializer.save(content=content)
 
 
