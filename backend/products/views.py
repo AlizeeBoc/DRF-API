@@ -21,6 +21,7 @@ class ProductListCreateAPIView(
     queryset = Product.objects.all()
     serializer_class = ProductSerializer  # indique quel sérializer utiliser pour convertir les Product en JSON
     # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # cf custom permissions
+    allow_staff_view = False
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
@@ -78,6 +79,7 @@ product_update_view = ProductUpdateAPIView.as_view()
 
 
 class ProductDestroyAPIView(
+    UserQuerySetMixin,
     StaffEditorPermissionMixin, generics.DestroyAPIView
 ):  # delete un objet par son id
     queryset = Product.objects.all()
